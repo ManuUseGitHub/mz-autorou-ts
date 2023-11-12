@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "description": "Automatic routing depending on routers into a folder tree. Like on a highway you do not care about how the engine works to go to a an exit. You just turn left or right while exploring new branches of the road! This will provide you with a road'map' for sure as destinations (index.js exporting a router)! are retrieving from a folder architecture. An autoroute is a a highway in French ;)",
-  "main": "/dist/index.js",
+  "main": "dist/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ManuUseGitHub/mz-express-autoroute-demo.git"
@@ -10,7 +10,29 @@
   "type": "module",
   "scripts": {
     "watch-serve": "nodemon --esm backend/server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-s": "npm run build --silent",
+    "dev-build-s": "npm run dev-build --silent",
+    "build": "npm run remove-dist && npm run compile && npm run bundle && npm run declare && npm run min && npm run remove-temp &&npm run end-bld",
+    "dev-build": "npm run remove-dist npx rimraf dist && npm run compile && npm run extract-temp && npm run end-dev-bld",
+    "bundle": "esbuild dist/TEMP/index.js --platform=node --bundle --outfile=dist/TEMP/index.bundle.js --sourcemap --external:'../package.json' && npm run end-bndl",
+    "extract-temp": "cp -r ./dist/TEMP/ ./dist/ && npm run remove-temp && npm run end-ext-tmp",
+    "remove-temp": "npx rimraf dist/TEMP && npm run end-rmv-tmp",
+    "remove-dist": "npx rimraf dist && npm run end-rmv-dist",
+    "min": "esbuild ./dist/TEMP/index.bundle.js --platform=node --minify --sourcemap --outfile=./dist/index.js && npm run end-min",
+    "compile": "npx tsc && npm run end-cmp",
+    "declare": "npx -p typescript tsc dist/TEMP/index.bundle.js --declaration --allowJs --emitDeclarationOnly --outDir dist && mv dist/index.bundle.d.ts dist/index.d.ts && npm run end-declare",
+    "watch-test": "jest --config jest.config.ts --watchAll",
+    "end-ins": "echo '[\\x1b[34m!\\x1b[37m] \\x1b[44mINSTALLED AND SET\\x1b[49m'",
+    "end-bld": "echo '[\\x1b[32m✔\\x1b[37m] \\x1b[42mBUILD FINISH\\x1b[49m'",
+    "end-dev-bld": "echo '[\\x1b[32m✔\\x1b[37m] \\x1b[42mBUILD FOR DEVELOPMENT FINISH\\x1b[49m'",
+    "end-bndl": "echo '[\\x1b[32m✔\\x1b[37m] \\x1b[32mscript files are bundled now\\x1b[37m'",
+    "end-ext-tmp": "echo '[\\x1b[32m✔\\x1b[37m] \\x1b[32mTEMP folder has been extracted from its content\\x1b[37m'",
+    "end-rmv-tmp": "echo '[\\x1b[32m✔\\x1b[37m] \\x1b[32mdist/TEMP folder is deleted from now\\x1b[37m'",
+    "end-rmv-dist": "echo '[\\x1b[32m✔\\x1b[37m] \\x1b[32mdist folder is deleted from now\\x1b[37m'",
+    "end-min": "echo '[\\x1b[32m✔\\x1b[37m] \\x1b[32mminified all script files\\x1b[37m'",
+    "end-cmp": "echo '[\\x1b[32m✔\\x1b[37m] \\x1b[32mTypeScript has finished to compile\\x1b[37m'",
+    "end-declare": "echo '[\\x1b[32m✔\\x1b[37m] \\x1b[32mTypes declaration have bean generated\\x1b[37m'"
   },
   "keywords": [
     "automatic",
@@ -28,9 +50,12 @@
   },
   "dependencies": {
     "btoa": "^1.2.1",
+    "esbuild": "^0.19.5",
     "express": "^4.18.2",
     "modulopt": "^2.2.5",
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "rimraf": "^5.0.5",
+    "ts-node": "^10.9.1"
   },
   "deprecated": false,
   "license": "MIT",

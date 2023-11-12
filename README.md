@@ -16,18 +16,30 @@ Mapping your routes by your routes folder structure
 
 1. Create a `server.js` file which has the following code : 
     ```js
-    const express = require('express');
-    const autoroute = require("maze-autoroute");
+    import express from "express";
+    import { Autoroute } from "../src/index.js";
+    import { ModuleBundle } from "../src/types.js";
     const app = express();
 
     // ROUTES ----------------------------------------------------------
-    const onmatch = ({route,module}) => app.use(route, require(module));
-    autoroute.getMapping({onmatch,verbose:true});
+    const onmatch = async ({ route, module }: ModuleBundle) => {
+        const { router } = await module
+
+        return app.use(route, router);
+    }
+    const options = {
+        onmatch,
+        rootp: "/backend/routes",
+        
+    }
+
+    const autoroute = new Autoroute();
+    autoroute.getMapping(options);
     // END ROUTES ------------------------------------------------------
 
     // Listening parameters
     app.listen(4000, () => {
-        console.log("Ready on port: " + 4000);
+        console.log("\nReady on port: " + 4000);
     });
     ```
 ### Try it !
