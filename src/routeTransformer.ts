@@ -41,7 +41,7 @@ export class RouteTransformer {
      */
     translateRoutes = (mapping: ModuleBundle[]) => {
         mapping.map(({ route }, i) => {
-            this.options!.translations.forEach(
+            this.options!.translations?.forEach(
                 (translate: Translation) => this.applyTranslation(mapping, translate, route, i)
             );
         })

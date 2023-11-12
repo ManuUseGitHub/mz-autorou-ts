@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import { optionize, stick } from "modulopt";
 import * as autorouteOptions from "./options.js";
-import { exists } from './utils.js';
 import {
     AutorouteOptions,
     RouteModule,
@@ -22,37 +21,37 @@ export class Autoroute {
     transformer: RouteTransformer = new RouteTransformer();
     // PUBLIC -------------------------------------------------------------
     getMapping = async (options: any) => {
-
         this.applyOptions(options as AutorouteOptions);
 
-        //try {
-        this.checkMappingPossible();
+        try {
+            this.checkMappingPossible();
 
-        const sortedMapping = this.transformer.remap(await this.createMapping())
+            const sortedMapping = this.transformer.remap(await this.createMapping())
 
-        // display available routes
-        this.hintMapping(sortedMapping);
-        this.linkCallBacks(sortedMapping);
+            // display available routes
+            this.hintMapping(sortedMapping);
+            this.linkCallBacks(sortedMapping);
 
-        // return the mapping for further use
-        return sortedMapping;
-        //} catch (err) { this.options.onerr(err); }
+            // return the mapping for further use
+            return sortedMapping;
+        } catch (err) { this.options.onerr(err); }
     }
 
     // PRIVATE ------------------------------------------------------------
 
 
     private applyOptions(options: AutorouteOptions | any = {}) {
-        if (options.rootp != undefined) {
-            let rootp = options.rootp;
-
-            // all empty-string '/' or '\' become './'
-            rootp = /^(?:(?:)|\/|\\)$/.test(rootp) ? "./" : rootp;
-            options.rootp = (path.normalize(process.cwd() + "/" + rootp));
-        }
-
         stick(optionize(this, autorouteOptions.data, false), options);
+        this.fixRootpToLocal();
         this.transformer.setOptions(options);
+    }
+
+    private fixRootpToLocal = () => {
+        let rootp = this.options!.rootp;
+
+        // all empty-string '/' or '\' become './'
+        rootp = /^(?:(?:)|\/|\\)$/.test(rootp) ? "./" : rootp;
+        this.options!.rootp = (path.normalize(process.cwd() + "/" + rootp));
     }
 
     private linkCallBacks = (mapping: ModuleBundle[]) => {
@@ -78,8 +77,8 @@ export class Autoroute {
             // only get the folders with a module of a router
             .map(async dirPath => {
                 const module = await this.isRouterModule(findIndexFileAt(dirPath)!)
-                if(module != null)
-                toReturn.push({ route: dirPath, module })
+                if (module != null)
+                    toReturn.push({ route: dirPath, module })
             }));
 
         return toReturn
@@ -106,9 +105,8 @@ export class Autoroute {
 
     private hintMapping = (mapping: ModuleBundle[]) => {
         if (this.options.verbose) {
-            console.log(`\nAUTOROUTING: routers in '${this.options.rootp}'`)
+            console.log(`\n\x1b[34mAUTOROUTING\x1b[37m: routers in \x1b[35m'${this.options.rootp}'\x1b[37m`)
             console.log("\u21AA", mapping.map(e => e.route))
-            console.log("To turn this message off, use the Autoroute with the option 'verbose:false'", "\n")
         }
     }
 }

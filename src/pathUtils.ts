@@ -45,9 +45,6 @@ export const importIndexModule = (indexFile: string) => {
 
 export const supplyRouterModuleOrNull = (module: any) => {
     const routerObject = module.router;
-    
-    console.log(typeof routerObject)
-    
     return (!!routerObject && routerObject.name == "router") ? module : null;
 }
 

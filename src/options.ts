@@ -1,10 +1,10 @@
 export const data = [
     // default values
-    ["verbose", false],
-    ["rootp", "routes/"],
+    ["verbose", true],
+    ["rootp", "/backend/routes"],
 
     // default behaviors
-    ["onmatch", (match:any) => { }],
+    ["onmatch", (match:any) => {}],
     ["onerr", ({
         message
     }:{message:string}) => {

@@ -35,36 +35,22 @@ Mapping your routes by your routes folder structure
 1. Create the `/backend/routes` folder structure.
 1. Create two modules in `/backend/routes` : `Hello` and `fun/World`
     ```js
-    // ---- In backend/routes/Hello/index.js ----
-
-    const express = require("express");
+    import express from "express";
+    import { fileURLToPath } from 'url';
+    import { dirname } from 'path';
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
     const router = express.Router();
 
     router.get('/', async (req, res) => {
-        res.send("Hello world! The automatic router works!");
+        res.send(`Welcome to this resource at FOLDER ${__dirname.replace(process.cwd(),"")}`);
     })
 
-    router.get('/submit-sign-in', async (req, res) => {
-        res.send("You are magically signed in!");
+    router.get('/greet/name/:something', async (req, res) => {
+        res.send(`Please to meet you ${req.params.something} ! I'm an endpoint defined at FOLDER ${__dirname.replace(process.cwd(),"")}`);
     })
 
-    module.exports = router;
-
-
-    // ---- In backend/routes/fun/World/index.js ----
-
-    const express = require("express");
-    const router = express.Router();
-
-    router.get('/', async (req, res) => {
-        res.send("Don't waste your time on basic routing... Just saying.");
-    })
-
-    router.get('/how-r-u', async (req, res) => {
-        res.send("Glad you asked! I am fine!");
-    })
-
-    module.exports = router;
+    export { router }
     ```
 
 
@@ -82,14 +68,14 @@ Mapping your routes by your routes folder structure
 if you do prefer having a concrete example of the autorouter without creating a brand new project, I get you covered with a small demo project on GitHub. [Go check it](https://github.com/ManuUseGitHub/mz-express-autoroute-demo).
 
 ## Options
-| Option       | default                                           | type            |
-|--------------|---------------------------------------------------|-----------------|
-| onmatch      | `match => {}`                                     | function        |
-| onerr        | `({message}) => { console.log(message) }`         | function        |
-| rootp        | `'routes/'`                           | string          |
-| subr         | null                                              | misc            |
-| translations | []                                                | array of object |
-| verbose      | false                                              | true           |
+| Option       | default                                   | type            |
+| ------------ | ----------------------------------------- | --------------- |
+| onmatch      | `match => {}`                             | function        |
+| onerr        | `({message}) => { console.log(message) }` | function        |
+| rootp        | `'routes/'`                               | string          |
+| subr         | null                                      | misc            |
+| translations | []                                        | array of object |
+| verbose      | false                                     | true            |
 
 ***
 #### `onmatch`
