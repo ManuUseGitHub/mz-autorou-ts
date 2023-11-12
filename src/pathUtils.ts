@@ -44,9 +44,11 @@ export const importIndexModule = (indexFile: string) => {
 }
 
 export const supplyRouterModuleOrNull = (module: any) => {
-    console.log(typeof (module), module)
-    console.log(typeof (module) == "function" && module.name == "router")
-    return (typeof (module) == "function" && module.name == "router") ? module : null;
+    const routerObject = module.router;
+    
+    console.log(typeof routerObject)
+    
+    return (!!routerObject && routerObject.name == "router") ? module : null;
 }
 
 export const isSubPartOfRoute = (route: string, next: string) => {

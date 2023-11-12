@@ -1,31 +1,34 @@
 import fs from 'fs';
 import path from 'path';
-import b64 from 'btoa';
 import { optionize, stick } from "modulopt";
 import * as autorouteOptions from "./options.js";
-import { AutorouteOptionsType as AutorouteOptions, RouteModule, ModuleBundle as ModuleBundle, Translation } from './types.js';
 import { exists } from './utils.js';
-import { findIndexFileAt, getDirectories, getDirectoriesRecursive, importIndexModule, isSubPartOfRoute, mappRouteWithModule, supplyRouterModuleOrNull } from './pathUtils.js';
-import { capitalize } from './stringUtils.js';
+import {
+    AutorouteOptions,
+    RouteModule,
+    ModuleBundle
+} from './types.js';
+import {
+    findIndexFileAt,
+    getDirectoriesRecursive,
+    importIndexModule,
+    mappRouteWithModule,
+    supplyRouterModuleOrNull
+} from './pathUtils.js';
+import { RouteTransformer } from './routeTransformer.js';
 
 export class Autoroute {
     options: AutorouteOptions | any = {}
+    transformer: RouteTransformer = new RouteTransformer();
     // PUBLIC -------------------------------------------------------------
-    getMapping = (options: any) => {
+    getMapping = async (options: any) => {
 
         this.applyOptions(options as AutorouteOptions);
 
         //try {
         this.checkMappingPossible();
 
-        const mapping = this.createMapping()
-
-        this.translateRoutes(mapping);
-
-        // sorting by route alphabetically
-        const sortedMapping = this.supplyMapingSortedAlphabetically(mapping)
-
-        this.flattenMapping(sortedMapping);
+        const sortedMapping = this.transformer.remap(await this.createMapping())
 
         // display available routes
         this.hintMapping(sortedMapping);
@@ -37,9 +40,7 @@ export class Autoroute {
     }
 
     // PRIVATE ------------------------------------------------------------
-    private supplyMapingSortedAlphabetically = (mapping: ModuleBundle[]) => {
-        return mapping.sort((a: ModuleBundle, b: ModuleBundle) => a.route.localeCompare(b.route));
-    }
+
 
     private applyOptions(options: AutorouteOptions | any = {}) {
         if (options.rootp != undefined) {
@@ -51,39 +52,45 @@ export class Autoroute {
         }
 
         stick(optionize(this, autorouteOptions.data, false), options);
-    }
-
-    private flattenMapping = (mapping: ModuleBundle[]) => {
-        if (this.options.flat) {
-            mapping.forEach(r => {
-                r.route = "/" + this.getSubRouteGroup(r.route).leaf
-            })
-        }
+        this.transformer.setOptions(options);
     }
 
     private linkCallBacks = (mapping: ModuleBundle[]) => {
         mapping.forEach(e => this.options.onmatch(e));
     }
 
-    private createMapping = () => {
+    private createMapping = async () => {
         const directories = getDirectoriesRecursive(this.options.rootp);
         const routeModules = this.collectRoutesAndModules(directories)
 
         // the mapping is entries of the providen route + module path to require
-        return this.replaceSubRoutes(
-            mappRouteWithModule(routeModules, this.options.rootp)
+        return this.transformer.replaceSubRoutes(
+            mappRouteWithModule(await routeModules, this.options.rootp)
         );
     }
 
-    private collectRoutesAndModules = (directories: string[]): RouteModule[] => {
-        return directories
+    private collectRoutesAndModules = async (directories: string[]): Promise<any> => {
+        const toReturn: RouteModule[] = []
+
+        await Promise.all(directories
             .map(p => path.normalize(p))
 
             // only get the folders with a module of a router
-            .map(dirPath => {
-                const module = this.isRouterModule(findIndexFileAt(dirPath)!)
-                return module != null ? { route: dirPath, module } : null;
-            }).filter(exists) as RouteModule[];
+            .map(async dirPath => {
+                const module = await this.isRouterModule(findIndexFileAt(dirPath)!)
+                if(module != null)
+                toReturn.push({ route: dirPath, module })
+            }));
+
+        return toReturn
+    }
+
+    isRouterModule = async (indexFile: string) => {
+        if (!indexFile) {
+            return null;
+        }
+        return !indexFile ? null :
+            supplyRouterModuleOrNull(await importIndexModule(indexFile));
     }
 
     private checkMappingPossible = () => {
@@ -97,126 +104,7 @@ export class Autoroute {
         }
     }
 
-    capitalizeLeaf = (route: string) => {
-        const g = this.getSubRouteGroup(route);
-
-        if (g.leaf.length > 0) {
-            route = `${g.branches}${capitalize(g.leaf)}`;
-        }
-    }
-
-    setBase64SubRoute = ({ mapping, i, route }: { mapping: ModuleBundle[], i: number, route: string }) => {
-        const m = /^(\/?(?:[^\/]+\/)*)([^\/]*)$/.exec(route)!;
-        const sub: string = m[2] ? m[2] : m[1]
-        mapping[i].route = (m[1] + b64(sub))
-            .replace(/[=]+$/, "");
-    }
-
-    getSubRouteGroup = (route: string): { branches: string, leaf: string } => {
-        /// [/sub/path/.../branching/][leaf]
-        const m = /(?<branches>(?:\/.*\/?)?\/)(?<leaf>[^\/]*)$/
-            .exec(route)
-
-        return m ? (m.groups as { branches: string, leaf: string }) : { branches: "", leaf: "" }
-    }
-
-    frameRoute = (r: ModuleBundle) => {
-        const { route } = r;
-        const g = this.getSubRouteGroup(route);
-
-        this.preframeRoute(r, g);
-        this.postframeRoute(r);
-    }
-
-    preframeRoute = (r: ModuleBundle, g: { branches: string, leaf: string }) => {
-        const before = this.options.frame.before;
-        if (before) {
-            r.route = `${g.branches}${before + g.leaf}`
-        }
-    }
-
-    postframeRoute = (r: ModuleBundle) => {
-        const after = this.options.frame.after;
-        if (after) {
-            r.route += after;
-        }
-    }
-
-    replaceSubRoutes = (mapping: ModuleBundle[]) => {
-        const result = mapping
-            .sort((a, b) => a.route.localeCompare(b.route))
-            .map((routeModule: ModuleBundle, i) => {
-                this.substituteRootModules(mapping, routeModule, i)
-                return routeModule;
-            });
-        return result;
-    }
-
-    substituteRootModules = (mapping: ModuleBundle[], routeModule: ModuleBundle, i: number) => {
-
-        const nextSegment = this.getNextSegmentOrLeaf(mapping, i)
-        const isSub = isSubPartOfRoute(routeModule.route, nextSegment)
-
-        if (isSub && this.options.subr != null) {
-            this.substituteAmbiguous(mapping, routeModule, i)
-        }
-    }
-
-    getNextSegmentOrLeaf = (mapping: ModuleBundle[], i: number) => {
-        return i < (mapping.length - 1) ? mapping[i + 1].route : "?";
-    }
-
-    substituteAmbiguous = (mapping: ModuleBundle[], routeModule: ModuleBundle, i: number) => {
-        if (routeModule.route === "/")
-            return
-        this.substituteWithFrame(routeModule);
-        this.substituteWithCapital(routeModule)
-        this.substituteWithBase64(routeModule, mapping, i)
-    }
-
-    substituteWithCapital = (routeModule: ModuleBundle) => {
-        if (this.options.subr == "cptlz") {
-            this.capitalizeLeaf(routeModule.route);
-        }
-    }
-
-    substituteWithFrame = (routeModule: ModuleBundle) => {
-        if (this.options.subr == "obj") {
-            this.frameRoute(routeModule);
-        }
-    }
-
-    substituteWithBase64 = (routeModule: ModuleBundle, mapping: ModuleBundle[], i: number) => {
-        if (this.options.subr == "b64") {
-            this.setBase64SubRoute({ mapping, i, route: routeModule.route });
-        }
-    }
-
-    /**
-     * replace specific routes by custom
-     * @param mapping 
-     */
-    translateRoutes = (mapping: ModuleBundle[]) => {
-        mapping.map(({ route }, i) => {
-            this.options.translations.forEach(
-                (translate: Translation) => this.applyTranslation(mapping, translate, route, i)
-            );
-        })
-    }
-
-    applyTranslation = (mapping: ModuleBundle[], translate: Translation, route: string, i: number) => {
-        if (("/" + translate.from) == route) {
-            mapping[i].route = "/" + translate.to;
-            return;
-        }
-    }
-
-    isRouterModule = async (indexFile: string) => {
-        return !indexFile ? null :
-            supplyRouterModuleOrNull(await importIndexModule(indexFile));
-    }
-
-    hintMapping = (mapping: ModuleBundle[]) => {
+    private hintMapping = (mapping: ModuleBundle[]) => {
         if (this.options.verbose) {
             console.log(`\nAUTOROUTING: routers in '${this.options.rootp}'`)
             console.log("\u21AA", mapping.map(e => e.route))
