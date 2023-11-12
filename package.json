@@ -1,0 +1,44 @@
+{
+  "version": "0.1.0",
+  "description": "Automatic routing depending on routers into a folder tree. Like on a highway you do not care about how the engine works to go to a an exit. You just turn left or right while exploring new branches of the road! This will provide you with a road'map' for sure as destinations (index.js exporting a router)! are retrieving from a folder architecture. An autoroute is a a highway in French ;)",
+  "main": "autoroute.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ManuUseGitHub/mz-express-autoroute-demo.git"
+  },
+  "homepage": "https://github.com/ManuUseGitHub/Maze-Autoroute",
+  "type": "module",
+  "scripts": {
+    "watch-serve": "nodemon --esm backend/server.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "automatic",
+    "routing",
+    "folder",
+    "workflow",
+    "time",
+    "express",
+    "server",
+    "autoroute",
+    "autorouting"
+  ],
+  "author": {
+    "name": "Maze014"
+  },
+  "dependencies": {
+    "btoa": "^1.2.1",
+    "express": "^4.18.2",
+    "modulopt": "^2.2.5",
+    "nodemon": "^3.0.1"
+  },
+  "deprecated": false,
+  "license": "MIT",
+  "name": "mz-autorou-ts",
+  "devDependencies": {
+    "@types/btoa": "^1.2.5",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.9.0",
+    "typescript": "^5.2.2"
+  }
+}
