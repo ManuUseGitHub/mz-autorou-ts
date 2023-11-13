@@ -106,7 +106,9 @@ export class Autoroute {
     private hintMapping = (mapping: ModuleBundle[]) => {
         if (this.options.verbose) {
             console.log(`\n\x1b[34mAUTOROUTING\x1b[37m: routers in \x1b[35m'${this.options.rootp}'\x1b[37m`)
-            console.log("\u21AA", "[", ...mapping.map(e => `\n  \x1b[34m${e.route}\x1b[37m`),"\n]",)
+            console.log("\u21AA", "[", ...mapping.map(e => `\n  \x1b[34m${e.route}\x1b[37m`), "\n]",)
         }
     }
 }
+
+export type { ModuleBundle };
