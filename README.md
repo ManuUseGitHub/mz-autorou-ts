@@ -15,40 +15,39 @@ With this, in practice, you would just have to create a folder structure, let's 
 
 
 1. Create a `backend` folder, go into it and run these commands :
-    ```bash
-    $ npm init
-    
-    $ npm install mz-autorou-ts
-    $ npm install express 
-    ```
+```sh
+$ npm init
 
-1. Create a `server.ts` file which has the following code : 
-    ```ts
-    import express from "express";
-    import { Autoroute } from "mz-autorou-ts";
-    import { ModuleBundle } from "../src/types.js";
-    const app = express();
+$ npm install mz-autorou-ts
+$ npm install express 
+```
 
-    // ROUTES ----------------------------------------------------------
-    const onmatch = async ({ route, module }: ModuleBundle) => {
-        const { router } = await module
+2. Create a `server.ts` file which has the following code : 
+```ts
+import express from "express";
+import { Autoroute } from "mz-autorou-ts";
+import { ModuleBundle } from "mz-autorou-ts/types";
+const app = express();
 
-        return app.use(route, router);
-    }
-    const options = {
-        // Put your options here
-        onmatch
-    }
+// ROUTES ----------------------------------------------------------
+const onmatch = async ({ route, module } : ModuleBundle) => {
+    const { router } = await module
 
-    const autoroute = new Autoroute();
-    autoroute.getMapping(options);
-    // END ROUTES ------------------------------------------------------
+    return app.use(route, router);
+}
+const options = {
+    onmatch
+}
 
-    // Listening parameters
-    app.listen(4000, () => {
-        console.log("\nReady on port: " + 4000);
-    });
-    ```
+const autoroute = new Autoroute();
+autoroute.getMapping(options);
+// END ROUTES ------------------------------------------------------
+
+// Listening parameters
+app.listen(4000, () => {
+    console.log("\nReady on port: " + 4000);
+});
+```
 ### Try it !
 
 1. Create the `/backend/routes` folder structure.
