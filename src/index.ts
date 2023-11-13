@@ -42,11 +42,11 @@ export class Autoroute {
 
     private applyOptions(options: AutorouteOptions | any = {}) {
         stick(optionize(this, autorouteOptions.data, false), options);
-        this.fixRootpToLocal();
-        this.transformer.setOptions(options);
+        this.fixRootpToCurrentWorkingDirectory();
+        this.transformer.setOptions(this.options);
     }
 
-    private fixRootpToLocal = () => {
+    private fixRootpToCurrentWorkingDirectory = () => {
         let rootp = this.options!.rootp;
 
         // all empty-string '/' or '\' become './'
@@ -106,7 +106,7 @@ export class Autoroute {
     private hintMapping = (mapping: ModuleBundle[]) => {
         if (this.options.verbose) {
             console.log(`\n\x1b[34mAUTOROUTING\x1b[37m: routers in \x1b[35m'${this.options.rootp}'\x1b[37m`)
-            console.log("\u21AA", mapping.map(e => e.route))
+            console.log("\u21AA", "[", ...mapping.map(e => `\n  \x1b[34m${e.route}\x1b[37m`),"\n]",)
         }
     }
 }

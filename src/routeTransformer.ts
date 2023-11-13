@@ -14,7 +14,6 @@ export class RouteTransformer {
 
     remap = (mapping: ModuleBundle[]) => {
         this.translateRoutes(mapping);
-
         // sorting by route alphabetically
         const sortedMapping = this.supplyMapingSortedAlphabetically(mapping)
 
@@ -71,16 +70,14 @@ export class RouteTransformer {
             });
         return result;
     }
-
     
     capitalizeLeaf = (route: string) => {
         const g = getSubRouteGroup(route);
 
-        if (g.leaf.length > 0) {
-            route = `${g.branches}${capitalize(g.leaf)}`;
-        }
+        return g.leaf.length > 0 ? 
+            `${g.branches}${capitalize(g.leaf)}` : 
+            route;
     }
-
     
     frameRoute = (r: ModuleBundle) => {
         const { route } = r;
@@ -116,7 +113,7 @@ export class RouteTransformer {
 
     substituteWithCapital = (routeModule: ModuleBundle) => {
         if (this.options!.subr == "cptlz") {
-            this.capitalizeLeaf(routeModule.route);
+            routeModule.route = this.capitalizeLeaf(routeModule.route);
         }
     }
 
