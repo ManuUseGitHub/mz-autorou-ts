@@ -1,5 +1,3 @@
-import { ModuleBundle } from "./types.js";
-
 export const getSubRouteGroup = (route: string): { branches: string, leaf: string } => {
     /// [/sub/path/.../branching/][leaf]
     const m = /(?<branches>(?:\/.*\/?)?\/)(?<leaf>[^\/]*)$/

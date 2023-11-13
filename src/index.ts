@@ -3,11 +3,6 @@ import path from 'path';
 import { optionize, stick } from "modulopt";
 import * as autorouteOptions from "./options.js";
 import {
-    AutorouteOptions,
-    RouteModule,
-    ModuleBundle
-} from './types.js';
-import {
     findIndexFileAt,
     getDirectoriesRecursive,
     importIndexModule,
@@ -15,8 +10,9 @@ import {
     supplyRouterModuleOrNull
 } from './pathUtils.js';
 import { RouteTransformer } from './routeTransformer.js';
+import { AutorouteOptions, ModuleBundle, RouteModule } from './types.js';
 
-export class Autoroute {
+class Autoroute {
     options: AutorouteOptions | any = {}
     transformer: RouteTransformer = new RouteTransformer();
     // PUBLIC -------------------------------------------------------------
@@ -111,4 +107,7 @@ export class Autoroute {
     }
 }
 
-export type { ModuleBundle };
+export {
+    Autoroute,
+    ModuleBundle
+}

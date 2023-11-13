@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs"
-import { ModuleBundle, RouteModule } from "./types.js";
 import { exists } from "./utils.js";
+import { ModuleBundle, RouteModule } from "./types.js";
 
 export const findIndexFileAt = (dirPath: string) => {
     return ["js", "ts"].map(extension => {

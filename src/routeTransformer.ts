@@ -2,7 +2,7 @@ import b64 from 'btoa';
 import { isSubPartOfRoute } from "./pathUtils.js";
 import { capitalize } from "./stringUtils.js";
 import { getNextSegmentOrLeaf, getSubRouteGroup } from "./subRouteUtils.js";
-import { AutorouteOptions, ModuleBundle, Translation } from "./types.js";
+import { AutorouteOptions, ModuleBundle, Translation } from './types.js';
 
 export class RouteTransformer {
 
