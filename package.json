@@ -1,5 +1,5 @@
 {
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Automatic routing depending on routers into a folder tree. Like on a highway you do not care about how the engine works to go to a an exit. You just turn left or right while exploring new branches of the road! This will provide you with a road'map' for sure as destinations (index.js exporting a router)! are retrieving from a folder architecture. An autoroute is a a highway in French ;)",
   "main": "dist/index.js",
   "repository": {
