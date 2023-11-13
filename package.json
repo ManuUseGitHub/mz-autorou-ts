@@ -22,7 +22,7 @@
     "min": "esbuild ./dist/TEMP/index.bundle.js --platform=node --minify --sourcemap --outfile=./dist/index.js && npm run end-min",
     "compile": "npx tsc && npm run end-cmp",
     "declare": "npx -p typescript tsc dist/TEMP/index.bundle.js --declaration --allowJs --emitDeclarationOnly --outDir dist && mv dist/index.bundle.d.ts dist/index.d.ts && npm run end-declare",
-    "declare-types": "npx -p typescript tsc src/types.ts --declaration --allowJs --emitDeclarationOnly --outDir types && npm run end-declare-types",
+    "declare-types": "npx -p typescript tsc src/types.ts --declaration --allowJs --emitDeclarationOnly --outDir types && mv types/types.d.ts types/index.d.ts && npm run end-declare-types",
     "watch-test": "jest --config jest.config.ts --watchAll",
     "end-ins": "echo '[\\x1b[34m!\\x1b[37m] \\x1b[44mINSTALLED AND SET\\x1b[49m'",
     "end-bld": "echo '[\\x1b[32m✔\\x1b[37m] \\x1b[42mBUILD FINISH\\x1b[49m'",
@@ -55,7 +55,7 @@
     "esbuild": "^0.19.5",
     "express": "^4.18.2",
     "modulopt": "^2.2.5",
-    "mz-autorou-ts": "^0.2.2",
+    "mz-autorou-ts": "^0.2.3",
     "nodemon": "^3.0.1",
     "rimraf": "^5.0.5",
     "ts-node": "^10.9.1"
